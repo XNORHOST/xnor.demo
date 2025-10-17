@@ -303,51 +303,83 @@
         backBtn = form.querySelector(".backBtn"),
         allInput = form.querySelectorAll(".first input, .first select");
 
-        // Channel selection functionality
-        const channelRadios = document.querySelectorAll('input[name="channel"]');
-        const contentOptions = document.querySelectorAll('.content-options');
+        // Elements for channel/content selection
+        const channelSelect = document.getElementById('channelSelect');
+        const contentOptionsContainer = document.getElementById('contentOptions');
+        const contentChoices = document.getElementById('contentChoices');
 
-        channelRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Hide all content options
-                contentOptions.forEach(option => {
-                    option.classList.remove('active');
-                });
-                
-                // Show the selected channel's content options
-                if (this.checked) {
-                    const contentId = this.value + '-content';
-                    document.getElementById(contentId).classList.add('active');
-                }
+        // Map available contents per channel
+        const contentMap = {
+            gaming: ['Action', 'Adventure', 'Strategy', 'Simulation'],
+            education: ['Science', 'Math', 'History', 'Language'],
+            music: ['Pop', 'Rock', 'Classical', 'Jazz']
+        };
+
+        // Populate content choices when a channel is selected
+        function showContentOptions() {
+            const channel = channelSelect.value;
+            contentChoices.innerHTML = '';
+
+            if (!channel) {
+                contentOptionsContainer.style.display = 'none';
+                return;
+            }
+
+            const items = contentMap[channel] || [];
+
+            items.forEach((item, idx) => {
+                const id = `${channel}-content-${idx}`;
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '8px';
+
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = `${channel}-content`;
+                input.id = id;
+                input.value = item;
+
+                const label = document.createElement('label');
+                label.htmlFor = id;
+                label.textContent = item;
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(label);
+                contentChoices.appendChild(wrapper);
             });
-        });
+
+            contentOptionsContainer.style.display = items.length ? 'block' : 'none';
+        }
+
+        // Initial hide
+        contentOptionsContainer.style.display = 'none';
 
         nextBtn.addEventListener("click", () => {
             let allFilled = true;
-            
+
             allInput.forEach(input => {
                 if (input.value === "") {
                     allFilled = false;
                 }
             });
-            
+
             // Check if a channel is selected
-            const selectedChannel = document.querySelector('input[name="channel"]:checked');
-            if (!selectedChannel) {
+            const selectedChannelValue = channelSelect.value;
+            if (!selectedChannelValue) {
                 allFilled = false;
                 alert("Please select a channel");
             }
-            
+
             // Check if content is selected for the chosen channel
-            if (selectedChannel) {
-                const contentName = selectedChannel.value + '-content';
-                const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+            if (selectedChannelValue) {
+                const selectedContent = document.querySelector(`input[name="${selectedChannelValue}-content"]:checked`);
                 if (!selectedContent) {
                     allFilled = false;
-                    alert(`Please select content for ${selectedChannel.value} channel`);
+                    alert(`Please select content for ${selectedChannelValue} channel`);
                 }
             }
-            
+
             if (allFilled) {
                 form.classList.add('secActive');
             }
@@ -361,17 +393,15 @@
             const birthday = document.getElementById('dob').value;
             const gender = document.getElementById('g').value;
             const country = document.getElementById('c').value;
-            const phoneNumber = "94703090240";
-            
+            const phoneNumberInput = document.getElementById('wn').value.trim();
+            const phoneNumber = phoneNumberInput ? phoneNumberInput : '94703090240';
+
             // Get selected channel and content
-            const selectedChannel = document.querySelector('input[name="channel"]:checked');
-            const channelName = selectedChannel ? selectedChannel.value : 'Not selected';
-            
-            const contentName = channelName + '-content';
-            const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+            const channelName = channelSelect.value || 'Not selected';
+            const selectedContent = document.querySelector(`input[name="${channelName}-content"]:checked`);
             const contentValue = selectedContent ? selectedContent.value : 'Not selected';
-            
-            const message = `Hello! Here's My Information 📥:%0A%0A* First Name: ${firstName}%0A* Second Name: ${secondName}%0A* Birthday: ${birthday}%0A* Gender: ${gender}%0A* Country: ${country}%0A* Selected Channel: ${channelName}%0A* Selected Content: ${contentValue}%0A%0A> *Powerd By X.N.O.R Website 🌐*`;
+
+            const message = `Hello! Here's My Information 📥:%0A%0A* First Name: ${firstName}%0A* Second Name: ${secondName}%0A* Birthday: ${birthday}%0A* Gender: ${gender}%0A* Country: ${country}%0A* Selected Channel: ${channelName}%0A* Selected Content: ${contentValue}%0A%0A> *Powered By X.N.O.R Website 🌐*`;
             const whatsappLink = `https://wa.me/${phoneNumber}?text=${message}`;
             window.open(whatsappLink, '_blank');
         }
@@ -383,15 +413,12 @@
             const wn = document.getElementById('wn').value;
             const g = document.getElementById('g').value;
             const c = document.getElementById('c').value;
-            
+
             // Get selected channel and content
-            const selectedChannel = document.querySelector('input[name="channel"]:checked');
-            const channel = selectedChannel ? selectedChannel.value : 'Not selected';
-            
-            const contentName = channel + '-content';
-            const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+            const channel = channelSelect.value || 'Not selected';
+            const selectedContent = document.querySelector(`input[name="${channel}-content"]:checked`);
             const content = selectedContent ? selectedContent.value : 'Not selected';
-            
+
             const googleSheetWebAppURL = "https://script.google.com/macros/s/AKfycbyU9Y27lBsYPCeUIDlzeYfn46QB6GVqeug5AgvqEDX4RcwU2K1sFrMXykxJOEsp0MWf/exec";
 
             const formData = new FormData();
