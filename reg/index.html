@@ -298,85 +298,84 @@
 
     <!-- =================== JS SECTION =================== -->
     <script>
-        // ===== FORM NAVIGATION =====
         const form = document.querySelector("form"),
         nextBtn = form.querySelector(".nextBtn"),
         backBtn = form.querySelector(".backBtn"),
-        allInput = form.querySelectorAll(".first input");
+        allInput = form.querySelectorAll(".first input, .first select");
+
+        // Channel selection functionality
+        const channelRadios = document.querySelectorAll('input[name="channel"]');
+        const contentOptions = document.querySelectorAll('.content-options');
+
+        channelRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Hide all content options
+                contentOptions.forEach(option => {
+                    option.classList.remove('active');
+                });
+                
+                // Show the selected channel's content options
+                if (this.checked) {
+                    const contentId = this.value + '-content';
+                    document.getElementById(contentId).classList.add('active');
+                }
+            });
+        });
 
         nextBtn.addEventListener("click", () => {
             let allFilled = true;
+            
             allInput.forEach(input => {
-                if (input.value.trim() === "") {
+                if (input.value === "") {
                     allFilled = false;
                 }
             });
+            
+            // Check if a channel is selected
+            const selectedChannel = document.querySelector('input[name="channel"]:checked');
+            if (!selectedChannel) {
+                allFilled = false;
+                alert("Please select a channel");
+            }
+            
+            // Check if content is selected for the chosen channel
+            if (selectedChannel) {
+                const contentName = selectedChannel.value + '-content';
+                const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+                if (!selectedContent) {
+                    allFilled = false;
+                    alert(`Please select content for ${selectedChannel.value} channel`);
+                }
+            }
+            
             if (allFilled) {
                 form.classList.add('secActive');
-            } else {
-                alert("Please fill out all fields before proceeding!");
             }
         });
 
         backBtn.addEventListener("click", () => form.classList.remove('secActive'));
 
-        // ===== SHOW CHANNEL CONTENT OPTIONS =====
-        function showContentOptions() {
-            const channel = document.getElementById("channelSelect").value;
-            const contentOptions = document.getElementById("contentOptions");
-            const contentChoices = document.getElementById("contentChoices");
-            const step2Title = document.getElementById("step2Title");
-
-            contentChoices.innerHTML = "";
-            contentOptions.style.display = "block";
-
-            let options = [];
-            let title = "";
-
-            if (channel === "gaming") {
-                title = "🎮 Gaming YouTube — Select Your Favorite Content";
-                options = ["FREE Fire", "Call of Duty®: Mobile", "PUBG", "Clash of Clans (CoC)"];
-            } 
-            else if (channel === "education") {
-                title = "📘 Education YouTube — Select Your Favorite Content";
-                options = ["Python", "HTML, CSS, JS", "Hacking", "WhatsApp Bot"];
-            } 
-            else if (channel === "music") {
-                title = "🎵 Music YouTube — Select Your Favorite Content";
-                options = ["Slowed & Reverb Songs", "English Songs", "Sinhala Songs", "Tamil Songs"];
-            }
-
-            step2Title.textContent = title;
-
-            options.forEach(opt => {
-                const label = document.createElement("label");
-                label.style.display = "flex";
-                label.style.alignItems = "center";
-                label.style.gap = "8px";
-                label.style.cursor = "pointer";
-                label.innerHTML = `<input type="radio" name="contentOption" value="${opt}" required> ${opt}`;
-                contentChoices.appendChild(label);
-            });
-        }
-
-        // ===== SEND TO WHATSAPP =====
         function sendToWhatsApp() {
             const firstName = document.getElementById('fn').value;
             const secondName = document.getElementById('sn').value;
             const birthday = document.getElementById('dob').value;
             const gender = document.getElementById('g').value;
             const country = document.getElementById('c').value;
-            const channel = document.getElementById("channelSelect").value;
-            const content = document.querySelector('input[name="contentOption"]:checked')?.value || "Not selected";
             const phoneNumber = "94703090240";
-
-            const message = `Hello! Here's My Information 📥:%0A%0A* First Name: ${firstName}%0A* Second Name: ${secondName}%0A* Birthday: ${birthday}%0A* Gender: ${gender}%0A* Country: ${country}%0A* Channel: ${channel}%0A* Content: ${content}%0A%0A> *Powered By X.N.O.R Website 🌐*`;
-
+            
+            // Get selected channel and content
+            const selectedChannel = document.querySelector('input[name="channel"]:checked');
+            const channelName = selectedChannel ? selectedChannel.value : 'Not selected';
+            
+            const contentName = channelName + '-content';
+            const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+            const contentValue = selectedContent ? selectedContent.value : 'Not selected';
+            
+            const message = `Hello! Here's My Information 📥:%0A%0A* First Name: ${firstName}%0A* Second Name: ${secondName}%0A* Birthday: ${birthday}%0A* Gender: ${gender}%0A* Country: ${country}%0A* Selected Channel: ${channelName}%0A* Selected Content: ${contentValue}%0A%0A> *Powerd By X.N.O.R Website 🌐*`;
             const whatsappLink = `https://wa.me/${phoneNumber}?text=${message}`;
             window.open(whatsappLink, '_blank');
         }
 
-        // ===== SEND TO GOOGLE SHEET =====
         function sendToGoogleSheet() {
             const fn = document.getElementById('fn').value;
             const sn = document.getElementById('sn').value;
@@ -384,11 +383,17 @@
             const wn = document.getElementById('wn').value;
             const g = document.getElementById('g').value;
             const c = document.getElementById('c').value;
-            const channel = document.getElementById("channelSelect").value;
-            const content = document.querySelector('input[name="contentOption"]:checked')?.value || "Not selected";
-
-            const googleSheetWebAppURL = "https://script.google.com/macros/s/AKfycbzFmTcaJ-2_uUyLjOKL9JA5YJkuBCcVenRPwmzdk-89qOwbQwVvBlqbU5kMwUGc-zK_/exec";
             
+            // Get selected channel and content
+            const selectedChannel = document.querySelector('input[name="channel"]:checked');
+            const channel = selectedChannel ? selectedChannel.value : 'Not selected';
+            
+            const contentName = channel + '-content';
+            const selectedContent = document.querySelector(`input[name="${contentName}"]:checked`);
+            const content = selectedContent ? selectedContent.value : 'Not selected';
+            
+            const googleSheetWebAppURL = "https://script.google.com/macros/s/AKfycbyU9Y27lBsYPCeUIDlzeYfn46QB6GVqeug5AgvqEDX4RcwU2K1sFrMXykxJOEsp0MWf/exec";
+
             const formData = new FormData();
             formData.append('fn', fn);
             formData.append('sn', sn);
@@ -404,8 +409,12 @@
                 body: formData,
                 mode: 'no-cors'
             })
-            .then(() => console.log('Data sent to Google Sheet successfully!'))
-            .catch(error => console.error('Error sending data to Google Sheet:', error));
+            .then(response => {
+                console.log('Data sent to Google Sheet successfully!');
+            })
+            .catch(error => {
+                console.error('Error sending data to Google Sheet:', error);
+            });
         }
     </script>
 </body>
